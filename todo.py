@@ -21,3 +21,25 @@ class Note(db.Model):
     pdf_filename = db.Column(db.String(300), nullable=True)  # store uploaded PDF filename
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Reminder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(255), nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+@app.route("/add_subtask/<int:sno>", methods=["POST"])
+def add_subtask(sno):
+    todo = Todo.query.get_or_404(sno)
+    title = request.form['subtask_title']
+    subtask = SubTask(todo_id=todo.sno, title=title, completed=False)
+    # reset parent to incomplete if it was completed
+    todo.completed = False
+    db.session.add(subtask)
+    db.session.commit()
+    return redirect(url_for("homepage"))
+
+# ✅ Added SubTask model here
+class SubTask(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    todo_id = db.Column(db.Integer, db.ForeignKey("todo.sno"), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    completed = db.Column(db.Boolean, default=False)

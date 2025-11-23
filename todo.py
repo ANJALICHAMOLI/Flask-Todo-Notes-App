@@ -37,9 +37,10 @@ def add_subtask(sno):
     db.session.commit()
     return redirect(url_for("homepage"))
 
-# ✅ Added SubTask model here
-class SubTask(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    todo_id = db.Column(db.Integer, db.ForeignKey("todo.sno"), nullable=False)
-    title = db.Column(db.String(200), nullable=False)
-    completed = db.Column(db.Boolean, default=False)
+if __name__ == "__main__":
+    with app.app_context():
+        # Drop all existing tables (useful during development)
+        db.drop_all()
+        # Create tables again with updated schema
+        db.create_all()
+    app.run(debug=True, port=8000)

@@ -36,6 +36,13 @@ def add_subtask(sno):
     db.session.add(subtask)
     db.session.commit()
     return redirect(url_for("homepage"))
+# ✅ Added SubTask model here
+class SubTask(db.Modle):
+    id = db.Column(db.Integer, primary_key=True)
+    todo_id = db.Column(db.Integer, db.ForeignKey("todo.sno"), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+
 
 if __name__ == "__main__":
     with app.app_context():

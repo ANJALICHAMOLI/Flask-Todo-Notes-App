@@ -42,7 +42,20 @@ class SubTask(db.Model):
     todo_id = db.Column(db.Integer, db.ForeignKey("todo.sno"), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     completed = db.Column(db.Boolean, default=False)
-
+    
+class Todo(db.Model):
+    sno = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    desc = db.Column(db.String(500), nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    completed = db.Column(db.Boolean, default=False)
+    # auto update from subtasks
+    subtasks = db.relationship(
+        "SubTask",
+        backref="todo",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
 
 if __name__ == "__main__":
     with app.app_context():

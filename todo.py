@@ -42,7 +42,7 @@ class SubTask(db.Model):
     todo_id = db.Column(db.Integer, db.ForeignKey("todo.sno"), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     completed = db.Column(db.Boolean, default=False)
-    
+
 class Todo(db.Model):
     sno = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -56,6 +56,8 @@ class Todo(db.Model):
         lazy=True,
         cascade="all, delete-orphan"
     )
+    def __repr__(self) -> str:
+        return f"{self.sno} - {self.title}"
 
 if __name__ == "__main__":
     with app.app_context():

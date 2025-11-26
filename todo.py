@@ -66,6 +66,14 @@ def notes():
         content = request.form.get("content")
         pdf_file = request.files.get("pdf_file")
         pdf_filename = None
+        if pdf_file and pdf_file.filename != "":
+            pdf_filename = secure_filename(pdf_file.filename)
+            pdf_file.save(os.path.join(app.config["UPLOAD_FOLDER"], pdf_filename))
+        note = Note(title=title, content=content, pdf_filename=pdf_filename)
+        db.session.add(note)
+        db.session.commit()
+        return redirect(url_for("notes"))
+    
           
 
 if __name__ == "__main__":

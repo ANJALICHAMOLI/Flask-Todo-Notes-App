@@ -73,6 +73,10 @@ def notes():
         db.session.add(note)
         db.session.commit()
         return redirect(url_for("notes"))
+    # only ONE query + ONE return
+    all_notes = Note.query.order_by(Note.date_created.desc()).all()
+    all_reminders = Reminder.query.order_by(Reminder.date_created.desc()).all()
+    return render_template("notes.html", notes=all_notes, reminders=all_reminders)  
     
           
 

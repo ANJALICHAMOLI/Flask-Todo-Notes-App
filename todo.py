@@ -58,6 +58,15 @@ class Todo(db.Model):
     )
     def __repr__(self) -> str:
         return f"{self.sno} - {self.title}"
+    
+@app.route("/notes", methods=["GET", "POST"])
+def notes():
+    if request.method == "POST":
+        title = request.form["title"]
+        content = request.form.get("content")
+        pdf_file = request.files.get("pdf_file")
+        pdf_filename = None
+          
 
 if __name__ == "__main__":
     with app.app_context():

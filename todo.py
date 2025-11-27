@@ -78,7 +78,10 @@ def notes():
     all_reminders = Reminder.query.order_by(Reminder.date_created.desc()).all()
     return render_template("notes.html", notes=all_notes, reminders=all_reminders)  
     
-          
+@app.route("/toggle_subtask/<int:id>", methods=["POST"])
+def toggle_subtask(id):
+    subtask = SubTask.query.get_or_404(id)
+    subtask.completed = not subtask.completed          
 
 if __name__ == "__main__":
     with app.app_context():

@@ -84,9 +84,9 @@ def toggle_subtask(id):
     subtask.completed = not subtask.completed 
      # check parent status: completed only if ALL subtasks are completed
     parent = subtask.todo
-    parent.completed = all(s.completed for st in parent.subtasks)
+    parent.completed = all(st.completed for st in parent.subtasks)
     db.session.commit()
-    return redirect(url_for("homepae"))         
+    return redirect(url_for("homepage"))         
 
 
 if __name__ == "__main__":

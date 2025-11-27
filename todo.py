@@ -81,7 +81,13 @@ def notes():
 @app.route("/toggle_subtask/<int:id>", methods=["POST"])
 def toggle_subtask(id):
     subtask = SubTask.query.get_or_404(id)
-    subtask.completed = not subtask.completed          
+    subtask.completed = not subtask.completed 
+     # check parent status: completed only if ALL subtasks are completed
+    parent = subtask.todo
+    parent.completed = all(s.completed for st in parent.subtasks)
+    db.session.commit()
+    return redirect(url_for("homepae"))         
+
 
 if __name__ == "__main__":
     with app.app_context():

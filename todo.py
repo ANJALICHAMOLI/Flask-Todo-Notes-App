@@ -89,6 +89,16 @@ def toggle_subtask(id):
     return redirect(url_for("homepage"))         
 
 
+@app.route("/", methods=['GET', 'POST'])
+def homepage():
+    if request.method == 'POST':
+        title = request.form['title']
+        desc = request.form['desc']
+        todo = Todo(title=title, desc=desc)
+        db.session.add(todo)
+        db.session.commit()
+        
+
 if __name__ == "__main__":
     with app.app_context():
         # Drop all existing tables (useful during development)

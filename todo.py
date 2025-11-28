@@ -98,7 +98,8 @@ def homepage():
         db.session.add(todo)
         db.session.commit()
         return redirect(url_for("homepage"))  # redirect so it doesn’t resubmit on refresh
-    
+    alltodo = Todo.query.all()
+    return render_template('todo.html', alltodo=alltodo)
         
 
 if __name__ == "__main__":

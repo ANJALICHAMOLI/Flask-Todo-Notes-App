@@ -100,6 +100,22 @@ def homepage():
         return redirect(url_for("homepage"))  # redirect so it doesn’t resubmit on refresh
     alltodo = Todo.query.all()
     return render_template('todo.html', alltodo=alltodo)
+
+# @app.route("/toggle/<int:sno>", methods=["POST"])
+# def toggle(sno):
+#     todo = Todo.query.get_or_404(sno)
+#     todo.completed = not todo.completed
+#     # update all subtasks accordingly
+#     for st in todo.subtasks:
+#         st.completed = todo.completed
+#     db.session.commit()
+#     return redirect(url_for("homepage"))
+
+@app.route("/show")
+def show():
+    alltodo = Todo.query.all()
+    print(alltodo)
+    return "these are products"
         
 
 if __name__ == "__main__":

@@ -120,7 +120,10 @@ def show():
 @app.route("/toggle/<int:sno>", methods=["POST"])
 def toggle(sno):
     todo = Todo.query.get_or_404(sno)
+    todo.completed = not todo.completed  # flip the checkbox
+    db.session.commit()
     
+        
 
 if __name__ == "__main__":
     with app.app_context():

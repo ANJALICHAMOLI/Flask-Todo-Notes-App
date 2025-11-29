@@ -116,7 +116,11 @@ def show():
     alltodo = Todo.query.all()
     print(alltodo)
     return "these are products"
-        
+
+@app.route("/toggle/<int:sno>", methods=["POST"])
+def toggle(sno):
+    todo = Todo.query.get_or_404(sno)
+    
 
 if __name__ == "__main__":
     with app.app_context():

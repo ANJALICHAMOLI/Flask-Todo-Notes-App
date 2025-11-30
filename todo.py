@@ -123,6 +123,13 @@ def toggle(sno):
     todo.completed = not todo.completed  # flip the checkbox
     db.session.commit()
     return redirect(url_for("homepage"))
+
+@app.route("/delete/<int:sno>", methods=["POST"])
+def delete_task(sno):
+    todo = Todo.query.get_or_404(sno)
+    db.session.delete(todo)
+    db.session.commit()
+    return redirect(url_for("homepage"))
     
         
 

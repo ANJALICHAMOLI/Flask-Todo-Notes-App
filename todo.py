@@ -137,6 +137,10 @@ def delete_note(id):
     db.session.delete(note)
     db.session.commit()
     return redirect(url_for("notes"))    
+
+@app.route("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
         
 
 if __name__ == "__main__":

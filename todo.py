@@ -142,7 +142,24 @@ def delete_note(id):
 def uploaded_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
         
+# @app.route("/toggle_subtask/<int:id>", methods=["POST"])
+# def toggle_subtask(id):
+#     subtask = SubTask.query.get_or_404(id)
+#     subtask.completed = not subtask.completed
+#     # check if all subtasks are completed
+#     parent = subtask.todo
+#     parent.completed = all(st.completed for st in parent.subtasks)
+#     db.session.commit()
+#     return redirect(url_for("homepage"))
 
+@app.route("/add_reminder", methods=["POST"])
+def add_reminder():
+    reminder_text = request.form.get("reminder_text")
+    if reminder_text:
+        reminder = Reminder(text=reminder_text)
+        db.session.add(reminder)
+        db.session.commit()
+        
 if __name__ == "__main__":
     with app.app_context():
         # Drop all existing tables (useful during development)

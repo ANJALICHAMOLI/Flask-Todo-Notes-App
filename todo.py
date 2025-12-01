@@ -159,7 +159,9 @@ def add_reminder():
         reminder = Reminder(text=reminder_text)
         db.session.add(reminder)
         db.session.commit()
-        
+        return redirect(url_for("notes"))  #  redirect back to dashboard
+    
+
 if __name__ == "__main__":
     with app.app_context():
         # Drop all existing tables (useful during development)

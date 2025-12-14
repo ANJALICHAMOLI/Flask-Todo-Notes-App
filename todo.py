@@ -167,7 +167,14 @@ def delete_reminder(id):
     reminder = Reminder.query.get_or_404(id)
     db.session.delete(reminder)
     db.session.commit()
-    return redirect(url_for("notes"))  # ✅ redirect back to dashboard   
+    return redirect(url_for("notes"))  # ✅ redirect back to dashboard  
+
+@app.route("/todos")
+def dashboard():
+    notes = Note.query.all()  # fetch all saved notes
+    reminders = Reminder.query.all()  # fetch all saved reminders
+    return render_template("homepage", notes=notes, reminders=reminders)
+
     
 
 if __name__ == "__main__":

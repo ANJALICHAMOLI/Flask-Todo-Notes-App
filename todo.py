@@ -160,6 +160,14 @@ def add_reminder():
         db.session.add(reminder)
         db.session.commit()
         return redirect(url_for("notes"))  #  redirect back to dashboard
+
+
+@app.route("/delete_reminder/<int:id>", methods=["POST"])
+def delete_reminder(id):
+    reminder = Reminder.query.get_or_404(id)
+    db.session.delete(reminder)
+    db.session.commit()
+    return redirect(url_for("notes"))  # ✅ redirect back to dashboard   
     
 
 if __name__ == "__main__":

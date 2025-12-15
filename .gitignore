@@ -4,3 +4,4 @@
 # But NOT these:
 !.gitignore
 !todo.py
+index.html

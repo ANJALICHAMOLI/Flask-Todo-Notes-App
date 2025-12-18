@@ -5,5 +5,5 @@
 !.gitignore
 !todo.py
 !index.html
-
+!login.html
 !templates/*.html

@@ -1,0 +1,168 @@
+class Reminder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(255), nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+
+@app.route("/add_subtask/<int:sno>", methods=["POST"])
+def add_subtask(sno):
+    todo = Todo.query.get_or_404(sno)
+    title = request.form['subtask_title']
+    subtask = SubTask(todo_id=todo.sno, title=title, completed=False)
+    # reset parent to incomplete if it was completed
+    todo.completed = False
+    db.session.add(subtask)
+    db.session.commit()
+    return redirect(url_for("homepage"))
+
+# ✅ Added SubTask model here
+class SubTask(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    todo_id = db.Column(db.Integer, db.ForeignKey("todo.sno"), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+
+class Todo(db.Model):
+    sno = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    desc = db.Column(db.String(500), nullable=False)
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    completed = db.Column(db.Boolean, default=False)
+    # auto update from subtasks
+    subtasks = db.relationship(
+        "SubTask",
+        backref="todo",
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    def __repr__(self) -> str:
+        return f"{self.sno} - {self.title}"
+
+@app.route("/notes", methods=["GET", "POST"])
+def notes():
+    if request.method == "POST":
+        title = request.form["title"]
+        content = request.form.get("content")
+        pdf_file = request.files.get("pdf_file")
+        pdf_filename = None
+        if pdf_file and pdf_file.filename != "":
+            pdf_filename = secure_filename(pdf_file.filename)
+            pdf_file.save(os.path.join(app.config["UPLOAD_FOLDER"], pdf_filename))
+        note = Note(title=title, content=content, pdf_filename=pdf_filename)
+        db.session.add(note)
+        db.session.commit()
+        return redirect(url_for("notes"))
+    # ✅ only ONE query + ONE return
+    all_notes = Note.query.order_by(Note.date_created.desc()).all()
+    all_reminders = Reminder.query.order_by(Reminder.date_created.desc()).all()
+    return render_template("notes.html", notes=all_notes, reminders=all_reminders)
+
+@app.route("/toggle_subtask/<int:id>", methods=["POST"])
+def toggle_subtask(id):
+    subtask = SubTask.query.get_or_404(id)
+    subtask.completed = not subtask.completed
+    # check parent status: completed only if ALL subtasks are completed
+    parent = subtask.todo
+    parent.completed = all(st.completed for st in parent.subtasks)
+    db.session.commit()
+    return redirect(url_for("homepage"))
+
+@app.route("/", methods=['GET', 'POST'])
+def homepage():
+    if request.method == 'POST':
+        title = request.form['title']
+        desc = request.form['desc']
+        todo = Todo(title=title, desc=desc)
+        db.session.add(todo)
+        db.session.commit()
+        return redirect(url_for("homepage"))  # redirect so it doesn’t resubmit on refresh
+    alltodo = Todo.query.all()
+    return render_template('todo.html', alltodo=alltodo)
+
+# @app.route("/toggle/<int:sno>", methods=["POST"])
+# def toggle(sno):
+#     todo = Todo.query.get_or_404(sno)
+#     todo.completed = not todo.completed
+#     # update all subtasks accordingly
+#     for st in todo.subtasks:
+#         st.completed = todo.completed
+#     db.session.commit()
+#     return redirect(url_for("homepage"))
+
+@app.route("/show")
+def show():
+    alltodo = Todo.query.all()
+    print(alltodo)
+    return "these are products"
+
+@app.route("/toggle/<int:sno>", methods=["POST"])
+def toggle(sno):
+    todo = Todo.query.get_or_404(sno)
+    todo.completed = not todo.completed  # flip the checkbox
+    db.session.commit()
+    return redirect(url_for("homepage"))
+
+@app.route("/delete/<int:sno>", methods=["POST"])
+def delete_task(sno):
+    todo = Todo.query.get_or_404(sno)
+    db.session.delete(todo)
+    db.session.commit()
+    return redirect(url_for("homepage"))
+
+@app.route("/delete_note/<int:id>", methods=["POST"])
+def delete_note(id):
+    note = Note.query.get_or_404(id)
+    db.session.delete(note)
+    db.session.commit()
+    return redirect(url_for("notes"))
+
+@app.route("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+# @app.route("/toggle_subtask/<int:id>", methods=["POST"])
+# def toggle_subtask(id):
+#     subtask = SubTask.query.get_or_404(id)
+#     subtask.completed = not subtask.completed
+#     # check if all subtasks are completed
+#     parent = subtask.todo
+#     parent.completed = all(st.completed for st in parent.subtasks)
+#     db.session.commit()
+#     return redirect(url_for("homepage"))
+
+@app.route("/add_reminder", methods=["POST"])
+def add_reminder():
+    reminder_text = request.form.get("reminder_text")
+    if reminder_text:
+        reminder = Reminder(text=reminder_text)
+        db.session.add(reminder)
+        db.session.commit()
+    return redirect(url_for("notes"))  # ✅ redirect back to dashboard
+
+@app.route("/delete_reminder/<int:id>", methods=["POST"])
+def delete_reminder(id):
+    reminder = Reminder.query.get_or_404(id)
+    db.session.delete(reminder)
+    db.session.commit()
+    return redirect(url_for("notes"))  # ✅ redirect back to dashboard
+
+# @app.route("/")
+# def dashboard():
+#     notes = Note.query.all()  # fetch notes from DB
+#     reminders = Reminder.query.all()  # fetch reminders from DB
+#     return render_template("dashboard.html", notes=notes, reminders=reminders)
+
+@app.route("/todos")
+def dashboard():
+    notes = Note.query.all()  # fetch all saved notes
+    reminders = Reminder.query.all()  # fetch all saved reminders
+    return render_template("homepage", notes=notes, reminders=reminders)
+
+if __name__ == "__main__":
+    with app.app_context():
+        # Drop all existing tables (useful during development)
+        db.drop_all()
+        # Create tables again with updated schema
+        db.create_all()
+    app.run(debug=True, port=8000)
+
